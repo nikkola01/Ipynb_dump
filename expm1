@@ -1,0 +1,39 @@
+import numpy as np
+import pandas as pd
+import os
+
+
+# Load the data
+file_path = 'VSCode/data.csv'
+labels = ['date', 'time', 'sensor', 'data', 'activity','on/off']
+data = pd.read_csv(file_path,  names=labels)
+
+#print(data['on/off'].isnull().values)
+#data['on/off'].isnull() 
+data['id'] = range(1, len(data) + 1)
+non_empty_on_off_ids = data.loc[data['on/off'].notna()]
+#print(non_empty_on_off_ids)
+actities = ['Meal_Preparation', 'Relax', 'Eating', 'Work', 'Sleeping', 'Wash_Dishes', 'Bed_to_Toilet', 'Enter_Home', 'Leave_Home', 'Housekeeping', 'Respirate']
+numOfEvents= []
+for l in actities:
+    numOfEvents= []
+    activity_ids = non_empty_on_off_ids.loc[non_empty_on_off_ids['activity'] == l, 'id'].tolist()
+    #print(activity_ids)
+    for i in range(0, len(activity_ids) - 1, 2):  # Increment by 2 for pairs of beg and end
+        beg_id = activity_ids[i]
+        end_id = activity_ids[i + 1]
+        numOfEvents.append(end_id-beg_id)
+        # Extract the segment from beg_id to end_id
+        segment = data[(data['id'] >= beg_id) & (data['id'] <= end_id) & (data['sensor'][0]!='T')]
+        #print(segment)
+        # Define the filename for this segment
+        filename = f"VSCode/{l}/{l}_segment_{i//2}.csv"
+        
+        # Save the segment to a CSV file
+        segment.to_csv(filename, index=False)
+        
+    with open(f"VSCode/{l}/{l}_num_events.txt", 'w') as f:
+        for line in numOfEvents:
+            f.write(f"{line}\n")
+            
+
