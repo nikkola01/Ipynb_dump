@@ -7,6 +7,10 @@ import os
 file_path = 'VSCode/data.csv'
 labels = ['date', 'time', 'sensor', 'data', 'activity','on/off']
 data = pd.read_csv(file_path,  names=labels)
+data = data[~data['sensor'].str.startswith('T', na=False)]
+
+print(data)
+
 
 #print(data['on/off'].isnull().values)
 #data['on/off'].isnull() 
@@ -24,7 +28,7 @@ for l in actities:
         end_id = activity_ids[i + 1]
         numOfEvents.append(end_id-beg_id)
         # Extract the segment from beg_id to end_id
-        segment = data[(data['id'] >= beg_id) & (data['id'] <= end_id) & (data['sensor'][0]!='T')]
+        segment = data[(data['id'] >= beg_id) & (data['id'] <= end_id)]
         #print(segment)
         # Define the filename for this segment
         filename = f"VSCode/{l}/{l}_segment_{i//2}.csv"
